@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import csv
+
 
 class LogisticNeuron():
 
@@ -23,18 +25,30 @@ class LogisticNeuron():
             Yest = self.predict_proba(X)
             self.w += (lr/p) * np.dot((Y-Yest), X.T).ravel()
             self.b += (lr/p) * np.sum(Y-Yest)
-            
 
-#%% Ejemplo -----------------------------------------------
-X = np.array([[0,0,1,1],
-              [0,1,0,1]])
-Y = np.array([[0,0,0,1]])
+#%% Extrayendo datos de diabetes.csv
+listaCsv = []
+X = np.zeros((8, 768))
+Y = np.zeros((1, 768))
+csvFile = open('diabetes.csv', 'r')
+lector = csv.reader(csvFile, delimiter=',')
+for fila in lector:
+    listaCsv.append(fila)
+listaCsv.pop(0)
+listaCsv = np.array(listaCsv)
+listaCsv = listaCsv.astype(float)
+for i in range(8):
+    X[i] = listaCsv[:,i]
+    X[i] = (X[i] - X[i].min(axis=0))/(X[i].max(axis=0) - X[i].min(axis=0))
+Y[0] = listaCsv[:, 8]
 
-
-neuron = LogisticNeuron(2)
+neuron = LogisticNeuron(8)
 neuron.fit(X, Y, lr=1)
 print(neuron.predict_proba(X))
 print(neuron.predict(X))
+acc = (np.sum(Y == neuron.predict(X)))/Y.shape[1]
+print(acc)
+
 
 #%% Dibujo ------------------------
 def draw_2d_percep(model):
@@ -50,8 +64,8 @@ for i in range(p):
 
 plt.title('Neurona logistica')
 plt.grid('on')
-plt.xlim([-2,2])
-plt.ylim([-2,2])
+plt.xlim([-1,2])
+plt.ylim([-1,2])
 plt.xlabel(r'$x_1$')
 plt.ylabel(r'$x_2$')
 draw_2d_percep(neuron)
